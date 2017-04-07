@@ -14,8 +14,8 @@ static int __init fuck_init(void)
 	printk("fuck_init\n");
 	return 0;
 }
-
-static void __init fuck_exit(void)
+// i wrong write __init so oops 
+static void __exit fuck_exit(void)
 {
 	printk("fuck_exit\n");
 }
