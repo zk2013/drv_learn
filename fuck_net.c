@@ -47,6 +47,8 @@
 #include <linux/pci.h>
 #include <asm/shmparam.h>
 
+#include "linux/fuck_net.h"
+
 #ifndef UTS_RELEASE
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33))
 #include <linux/utsrelease.h>
@@ -141,6 +143,7 @@ else
   return rc;
 }
 
+static struct proto fuck_proto;
 static struct packet_type prot_hook;
 
 void register_device_handler(void) 
@@ -155,11 +158,67 @@ void unregister_device_handler(void)
   dev_remove_pack(&prot_hook); /* Remove protocol hook */
 }
 
+static struct proto fuck_proto = {
+    .name = "PF_FUCK",
+    .owner = THIS_MODULE,
+    .obj_size = sizeof(struct fuck_sock),
+};
+
+int fuck_release(struct socket* sock) {
+    struct sock *sk = sock->sk;
+    
+	if (sk) {
+        sock->sk = NULL;
+        sock_put(sk);
+    }
+    return 0;
+}
+static struct proto_ops fuck_ops = {
+    .family = PF_FUCK,
+    .owner = THIS_MODULE,
+    .release = fuck_release,
+    .connect = sock_no_connect,
+    .socketpair = sock_no_socketpair,
+    .accept = sock_no_accept,
+    .getname = sock_no_getname,
+    .listen = sock_no_listen,
+    .shutdown = sock_no_shutdown,
+    .sendpage = sock_no_sendpage,
+};
+
+static int fuck_create(struct net *net, struct socket *sock, int protocol,
+		       int kern)
+{
+    int err = 0;
+	err = -EPERM;
+out:
+    return err;
+}
+
+static struct net_proto_family fuck_family_ops = {
+  .family = PF_FUCK,
+  .create = fuck_create,
+  .owner = THIS_MODULE,
+};
+
 static int __init fuck_init(void)
 {
-	printk("fuck_init\n");
+    int rc;
+    
+	printk("[PF_FUCK] Welcoame to PF_FUCK %s\n"
+    "(C) 2016 zk2013\n",
+    FUCK_VERSION);
+    /* int proto_register(struct proto *prot, int alloc_slab)
+    prot->slab = kmem_cache_create(prot->name, prot->obj_size, 0,
+					SLAB_HWCACHE_ALIGN | prot->slab_flags,
+					NULL); */
+                    
+     if((rc = proto_register(&fuck_proto, 0)) != 0)
+        return(rc);
     
     fuck_proc_init();
+    
+    sock_register(&fuck_family_ops);
     
     register_device_handler();
      
@@ -171,10 +230,16 @@ static void __exit fuck_exit(void)
 	printk("fuck_exit\n");
     unregister_device_handler();
     fuck_proc_term();
-    
+    sock_unregister(PF_FUCK);
+    proto_unregister(&fuck_proto);
 }
 
 module_init(fuck_init);
 module_exit(fuck_exit);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("zk2013");
+MODULE_ALIAS_NETPROTO(PF_FUCK);
+/*
+#define MODULE_ALIAS_NETPROTO(proto) \
+	MODULE_ALIAS("net-pf-" __stringify(proto))
+*/

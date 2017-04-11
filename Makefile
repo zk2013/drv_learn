@@ -13,7 +13,7 @@ HERE=${PWD}
 INSTDIR := $(DESTDIR)/lib/modules/$(BUILD_KERNEL)/kernel/net/fuck_net
 TARGETDIR := $(DESTDIR)/usr/src/$(BUILD_KERNEL)/include/linux/
 
-all: Makefile fuck_net.c linux/fuck_net.h
+all: userland Makefile fuck_net.c linux/fuck_net.h
 #	@if test "$(USER)" = "root"; then \
 #		echo "********** WARNING WARNING WARNING **********"; \
 #		echo "*"; \
@@ -26,6 +26,7 @@ all: Makefile fuck_net.c linux/fuck_net.h
 #	cd plugins; make
 
 clean:
+	make -C test clean
 	make -C /lib/modules/$(BUILD_KERNEL)/build SUBDIRS=$(HERE) clean
 	\rm -f *~ Module.symvers  Module.markers  modules.order *#
 
@@ -47,3 +48,6 @@ else
 	@echo "insmod <path>/fuck_net.ko" ;
 	@echo "*****";
 endif
+
+userland:
+	make -C test
