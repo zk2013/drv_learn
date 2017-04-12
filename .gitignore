@@ -5,3 +5,4 @@ fuck_net.mod.c
 *.o
 *.ko
 !.gitignore
+test/fctest
