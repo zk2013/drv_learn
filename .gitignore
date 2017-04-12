@@ -1,0 +1,7 @@
+.*
+modules.order
+Module.symvers
+fuck_net.mod.c
+*.o
+*.ko
+!.gitignore
