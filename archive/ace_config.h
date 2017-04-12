@@ -1,0 +1,6 @@
+#define ACE_HAS_EVENT_POLL
+#define ACE_DEFAULT_BACKLOG 1024
+#define ACE_HAS_REACTOR_NOTIFICATION_QUEUE
+#define ACE_USE_MY_TIMESTAMP 1
+#define ACE_TIMER_SKEW (1000 * 1)
+#include "ace/config-linux.h"
